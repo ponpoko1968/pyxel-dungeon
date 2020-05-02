@@ -92,7 +92,7 @@ class App:
 
     def __init__(self):
         self.char_pos = Point(7,4)
-        self.char_direction =  Direction.West
+        self.char_direction =  Direction.North
         self.walls = {
             'a' : Rect( corners[4].upper_left,
             corners[3].lower_left,
@@ -127,7 +127,7 @@ class App:
                 Point(corners[0].upper_right.x, corners[2].upper_right.y),
                 Point(corners[0].upper_right.x, corners[2].lower_right.y)),
             'h': Rect(Point(0, corners[2].upper_left.y),
-                    corners[2].lower_right,
+                    corners[2].lower_left,
                     pyxel.COLOR_WHITE),
             'i' : Rect(corners[2].upper_left,
                     corners[2].lower_right,
@@ -146,7 +146,7 @@ class App:
                 corners[1].lower_right),
 
             'm': Rect(Point(0, corners[1].upper_left.y),
-                    corners[1].lower_right,
+                    corners[1].lower_left,
                     pyxel.COLOR_WHITE),
             'n' : Rect(corners[1].upper_left,
                     corners[1].lower_right,
@@ -164,6 +164,20 @@ class App:
                 corners[0].upper_right,
                 corners[0].lower_right),
         }
+        self.wall_map = {(1,0): ['a'],
+                        (2,0):['b'],
+                        (3,0): ['c'],
+                        (0,1): ['d'],
+                        (1,1): ['e', 'h'],
+                        (2,1): ['i'],
+                        (3,1): ['j', 'f'],
+                        (4,1): ['g'],
+                        (1,2): ['k','m'],
+                        (2,2): ['n'],
+                        (3,2): ['l', 'o'],
+                        (1,3): ['p'],
+                        (3,3): ['q']
+                    }
         self.dungeon = self.load_dungeon()
         print(self.dungeon)
         for direction in Direction:
@@ -171,9 +185,8 @@ class App:
             window = self.update_window()
             print(direction)
             print(window)
-        for c in corners:
-            print(c)
-        print(self.walls['a'])
+
+        self.char_direction = Direction.North
         pyxel.init(256, 256, caption="dungeon")
         pyxel.run(self.update, self.draw)
 
@@ -202,31 +215,41 @@ class App:
                     window[abs(range_y.start)+relative_y,abs(range_x.start)+relative_x] = self.dungeon[y,x]
                 else:
                     window[abs(range_y.start)+relative_y,abs(range_x.start)+relative_x] = 1
+
         if self.char_direction == Direction.South:
             window = np.rot90(window,2)
         elif self.char_direction == Direction.East:
             window = np.rot90(window)
         elif self.char_direction == Direction.West:
             window = np.rot90(window,3)
-            pass
+
         return window
 
     def update(self):
         if pyxel.btnp(pyxel.KEY_Q):
             pyxel.quit()
+        if pyxel.btnr(pyxel.KEY_W):
+            self.char_pos = Point(self.char_pos.x, self.char_pos.y - 1)
 
     def draw(self):
         pyxel.cls(0)
-        # for c in corners:
-        #     c.draw()
-        self.walls['h'].draw()
-        self.walls['i'].draw()
-        self.walls['j'].draw()
-        self.walls['m'].draw()
-        self.walls['n'].draw()
-        self.walls['o'].draw()
-        self.walls['p'].draw()
-        self.walls['q'].draw()
+        window = self.update_window()
+        print(window)
+        # for pos in  [ (1,0), (0,1), (1,1), (2,0),(2,1),(3,0), (3,1), (4,1),(3,2),
+        #             (3,3),
+        #             (1,2),(1,3)
+        # ]:
+        #     wall=self.wall_map[pos]
+        #     for w  in wall:
+        #         self.walls[w].draw()
+        # return
+        for y in range(0,4):
+            for x in range(0,5):
+                if window[y, x] == 1 and (x,y) in self.wall_map:
+                    for wall in self.wall_map[(x,y)]:
+                        print("({},{}) '{}'".format(x,y,wall))
+                        self.walls[wall].draw()
+                
 
 
 App()
