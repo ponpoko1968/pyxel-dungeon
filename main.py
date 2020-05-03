@@ -164,19 +164,20 @@ class App:
                 corners[0].upper_right,
                 corners[0].lower_right),
         }
-        self.wall_map = {(1,0): ['a'],
-                        (2,0):['b'],
-                        (3,0): ['c'],
-                        (0,1): ['d'],
+        self.wall_map = {
+                        (1,0): [None, 'a'],
+                        (2,0): [None, 'b'],
+                        (3,0): [None,'c'],
+                        (0,1): ['d',None],
                         (1,1): ['e', 'h'],
-                        (2,1): ['i'],
-                        (3,1): ['j', 'f'],
-                        (4,1): ['g'],
+                        (2,1): [None,'i'],
+                        (3,1): ['f', 'j'],
+                        (4,1): ['g', None],
                         (1,2): ['k','m'],
-                        (2,2): ['n'],
+                        (2,2): [None,'n'],
                         (3,2): ['l', 'o'],
-                        (1,3): ['p'],
-                        (3,3): ['q']
+                        (1,3): [None,'p'],
+                        (3,3): [None,'q']
                     }
         self.dungeon = self.load_dungeon()
         print(self.dungeon)
@@ -187,7 +188,9 @@ class App:
             print(window)
 
         self.char_direction = Direction.North
+        self.window = self.update_window()
         pyxel.init(256, 256, caption="dungeon")
+        pyxel.load("my_resource.pyxres", False, False, True, False)
         pyxel.run(self.update, self.draw)
 
     def load_dungeon(self):
@@ -210,7 +213,6 @@ class App:
             for relative_y in range_y:
                 x = self.char_pos.x + relative_x
                 y = self.char_pos.y + relative_y
-                #print("({},{}), ({},{}), ({},{})".format(x,y,  relative_x,relative_y, abs(range_x.start)+relative_x, abs(range_y.start)+relative_y))
                 if x >= 0 and  y >= 0 and x < 16 and y < 16:
                     window[abs(range_y.start)+relative_y,abs(range_x.start)+relative_x] = self.dungeon[y,x]
                 else:
@@ -228,28 +230,69 @@ class App:
     def update(self):
         if pyxel.btnp(pyxel.KEY_Q):
             pyxel.quit()
+        diffs =  {
+            Direction.North: Point(0, -1),
+            Direction.West:  Point(-1, 0),
+            Direction.South: Point(0, 1),
+            Direction.East: Point(1,0)
+        }
+        directions = {
+            Direction.North: {pyxel.KEY_A: Direction.West,  pyxel.KEY_D: Direction.East},
+            Direction.West:  {pyxel.KEY_A: Direction.South, pyxel.KEY_D: Direction.North},
+            Direction.South: {pyxel.KEY_A: Direction.East, pyxel.KEY_D: Direction.West},
+            Direction.East: {pyxel.KEY_A: Direction.North, pyxel.KEY_D: Direction.South}
+        }
+        new_pos = Point(-1,-1)
+        # north
         if pyxel.btnr(pyxel.KEY_W):
-            self.char_pos = Point(self.char_pos.x, self.char_pos.y - 1)
+            diff = diffs[self.char_direction]
+            new_pos = Point(self.char_pos.x + diff.x, self.char_pos.y + diff.y)
+            if new_pos.x < 0 or new_pos.y < 0 or new_pos.x > 15 or new_pos.y > 15 \
+                or self.dungeon[new_pos.y, new_pos.x] > 0:
+                pyxel.play(0, 1)
+            else:
+                self.char_pos = new_pos
+                self.window = self.update_window()
+                print (self.window)
+                print(self.draw_seq())
+
+        # south
+        if pyxel.btnr(pyxel.KEY_S):
+            diff = diffs[self.char_direction]
+            new_pos = Point(self.char_pos.x - diff.x, self.char_pos.y - diff.y)
+            if new_pos.x < 0 or new_pos.y < 0 or new_pos.x > 15 or new_pos.y > 15 \
+                or self.dungeon[new_pos.y, new_pos.x] > 0:
+                pyxel.play(0, 1)
+            else:
+                self.char_pos = new_pos
+                self.window = self.update_window()
+                print (self.window)
+
+        if pyxel.btnr(pyxel.KEY_A):
+            self.char_direction = directions[self.char_direction][pyxel.KEY_A]
+            self.window = self.update_window()
+
+        if pyxel.btnr(pyxel.KEY_D):
+            self.char_direction = directions[self.char_direction][pyxel.KEY_D]
+            self.window = self.update_window()
+
+    def draw_seq(self):
+        seq = []
+        for y in range(0,4):
+            for x in range(0,5):
+                if self.window[y, x] == 1 and (x,y) in self.wall_map and self.wall_map[(x,y)][0]:
+                    seq.append(self.wall_map[(x,y)][0])
+            for x in range(0,5):
+                if self.window[y, x] == 1 \
+                    and (x,y) in self.wall_map \
+                    and len(self.wall_map[(x,y)]) >= 2 \
+                    and self.wall_map[(x,y)][1]:
+                    seq.append(self.wall_map[(x,y)][1])
+        return seq
 
     def draw(self):
         pyxel.cls(0)
-        window = self.update_window()
-        print(window)
-        # for pos in  [ (1,0), (0,1), (1,1), (2,0),(2,1),(3,0), (3,1), (4,1),(3,2),
-        #             (3,3),
-        #             (1,2),(1,3)
-        # ]:
-        #     wall=self.wall_map[pos]
-        #     for w  in wall:
-        #         self.walls[w].draw()
-        # return
-        for y in range(0,4):
-            for x in range(0,5):
-                if window[y, x] == 1 and (x,y) in self.wall_map:
-                    for wall in self.wall_map[(x,y)]:
-                        print("({},{}) '{}'".format(x,y,wall))
-                        self.walls[wall].draw()
-                
-
+        for key in self.draw_seq():
+            self.walls[key].draw()
 
 App()
