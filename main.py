@@ -1,6 +1,7 @@
 from enum import Enum
 import numpy as np
 import pyxel
+import asyncio
 
 class Direction(Enum):
     North = 1
@@ -98,81 +99,81 @@ class App:
         self.walls = {
             'a' : Rect( corners[4].upper_left,
             corners[3].lower_left,
-            pyxel.COLOR_STEELBLUE),
+            pyxel.COLOR_DARK_BLUE),
             'b' : Rect(
                 corners[3].upper_left,
                 corners[3].lower_right,
-                pyxel.COLOR_STEELBLUE
+                pyxel.COLOR_DARK_BLUE
             ),
             'c' : Rect(
                 corners[3].upper_right,
                 corners[4].lower_right,
-                pyxel.COLOR_STEELBLUE
+                pyxel.COLOR_DARK_BLUE
             ),
             'd' : Trapezoid(
                 corners[4].upper_left,
                 corners[4].lower_left,
                 Point(corners[0].upper_left.x, corners[2].upper_left.y),
                 Point(corners[0].upper_left.x, corners[2].lower_left.y),
-                pyxel.COLOR_STEELBLUE
+                pyxel.COLOR_DARK_BLUE,
             ),
             'e' :  Trapezoid(corners[3].upper_left,
                 corners[3].lower_left,
                 corners[2].upper_left,
                 corners[2].lower_left,
-                pyxel.COLOR_STEELBLUE),
+                pyxel.COLOR_DARK_BLUE),
             'f' :  Trapezoid(corners[3].upper_right,
                 corners[3].lower_right,
                 corners[2].upper_right,
                 corners[2].lower_right,
-                pyxel.COLOR_STEELBLUE),
+                pyxel.COLOR_DARK_BLUE),
             'g' : Trapezoid(
                 corners[4].upper_right,
                 corners[4].lower_right,
                 Point(corners[0].upper_right.x, corners[2].upper_right.y),
                 Point(corners[0].upper_right.x, corners[2].lower_right.y),
-                pyxel.COLOR_STEELBLUE),
+                pyxel.COLOR_DARK_BLUE),
             'h': Rect(Point(0, corners[2].upper_left.y),
                     corners[2].lower_left,
-                    pyxel.COLOR_STEELBLUE),
+                    pyxel.COLOR_DARK_BLUE),
             'i' : Rect(corners[2].upper_left,
                     corners[2].lower_right,
-                    pyxel.COLOR_STEELBLUE),
+                    pyxel.COLOR_DARK_BLUE),
             'j': Rect(corners[2].upper_right,
                         Point(corners[0].lower_right.x, corners[2].lower_right.y),
-                        pyxel.COLOR_STEELBLUE
+                        pyxel.COLOR_DARK_BLUE
                     ),
             'k' :  Trapezoid(corners[2].upper_left,
                 corners[2].lower_left,
                 corners[1].upper_left,
                 corners[1].lower_left,
-                pyxel.COLOR_STEELBLUE),
+                pyxel.COLOR_DARK_BLUE),
             'l' :  Trapezoid(corners[2].upper_right,
                 corners[2].lower_right,
                 corners[1].upper_right,
                 corners[1].lower_right,
-                pyxel.COLOR_STEELBLUE),
+                pyxel.COLOR_DARK_BLUE),
 
             'm': Rect(Point(0, corners[1].upper_left.y),
                     corners[1].lower_left,
-                    pyxel.COLOR_STEELBLUE),
+                    pyxel.COLOR_DARK_BLUE),
             'n' : Rect(corners[1].upper_left,
                     corners[1].lower_right,
-                    pyxel.COLOR_STEELBLUE),
+                    pyxel.COLOR_DARK_BLUE),
             'o': Rect(corners[1].upper_right,
                         Point(corners[0].lower_right.x, corners[1].lower_right.y),
-                        pyxel.COLOR_STEELBLUE
+                        pyxel.COLOR_DARK_BLUE
                     ),
             'p' :  Trapezoid(corners[1].upper_left,
                 corners[1].lower_left,
                 corners[0].upper_left,
                 corners[0].lower_left,
-                pyxel.COLOR_WHITE),
+                pyxel.COLOR_DARK_BLUE),
             'q' :  Trapezoid(corners[1].upper_right,
                 corners[1].lower_right,
                 corners[0].upper_right,
                 corners[0].lower_right,
-                pyxel.COLOR_WHITE),
+                pyxel.COLOR_DARK_BLUE),
         }
         self.wall_map = {
                         (1,0): [None, 'a'],
@@ -199,7 +200,7 @@ class App:
 
         self.char_direction = Direction.North
         self.window = self.update_window()
-        pyxel.init(256, 256, caption="dungeon")
+        pyxel.init(256, 256)
         pyxel.load("my_resource.pyxres", False, False, True, False)
         pyxel.run(self.update, self.draw)
 
@@ -307,6 +308,8 @@ class App:
         for y in range(0,16):
             for x in range(0,16):
                 if self.dungeon[y,x] > 0:
-                    pyxel.rect(x*2, y*2, 2, 2, pyxel.COLOR_DARKGRAY )
+                    pyxel.rect(x*2, y*2, 2, 2, pyxel.COLOR_GRAY )
         pyxel.rect(self.char_pos.x*2, self.char_pos.y*2,2,2, pyxel.COLOR_PINK)
-App()
+
+asyncio.run(App())
+#App()
