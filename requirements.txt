@@ -5,4 +5,4 @@ packaging==24.2
 pyinstaller==6.11.1
 pyinstaller-hooks-contrib==2024.11
 pyxel==2.2.10
-setuptools==83.0.0
+setuptools==84.1.0
